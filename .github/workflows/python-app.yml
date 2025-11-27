@@ -1,5 +1,4 @@
-name: Simple Even-Odd CI
-
+name: Even-Odd CI/CD
 
 on:
   push:
@@ -8,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
+  ci:
     name: Run Tests
     runs-on: ubuntu-latest
 
@@ -28,3 +27,29 @@ jobs:
 
       - name: Run unit tests
         run: pytest -q
+
+  cd:
+    name: Deploy HTML Page
+    needs: ci 
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create deploy folder
+        run: |
+          mkdir deploy
+          echo "<h1>Even-Odd Model Trained Successfully!</h1>" > deploy/index.html
+          echo "<p>All tests passed ✔</p>" >> deploy/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./deploy
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
